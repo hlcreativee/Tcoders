@@ -1,11 +1,12 @@
-# Git Introduction
+# Software Development Team TCoders
 
-Repository ini dibuat sebagai tugas pengenalan Git dan GitHub pada mata kuliah Software Development.
+## Anggota Kelompok 
+1. Moch Habiballah - Project Manager
+2. Daniel Bintang Augustian - Front End Developer
+3. Ahmad Rizal Fadeli - Back End Developer
 
-Nama : Moch Habillah
-NPM : 2313020226
+## Mata Kuliah
+Software Development
 
-## Tools yang digunakan
-- Git
-- GitHub
-- Visual Studio Code
+## Deskripsi repository
+Repository ini dibuat untuk kolaborasi pengerjaan proyek software development
