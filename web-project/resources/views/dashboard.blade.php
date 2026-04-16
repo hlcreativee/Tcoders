@@ -44,23 +44,17 @@
 const data = @json($data);
 const prediksi = {{ $prediksi }};
 
-// =========================
-// TOTAL REVENUE
-// =========================
 let totalRevenue = 0;
 data.forEach(d => totalRevenue += Number(d.total));
 
 document.getElementById("total-revenue").innerText =
     "Rp " + totalRevenue.toLocaleString();
 
-// =========================
-// TOTAL TRANSAKSI
-// =========================
+
+
 document.getElementById("total-trx").innerText = data.length;
 
-// =========================
-// PRODUK TERLARIS
-// =========================
+
 const produkCount = {};
 
 data.forEach(d => {
@@ -73,13 +67,10 @@ const topProduct = Object.keys(produkCount).reduce((a,b)=>
 
 document.getElementById("top-product").innerText = topProduct;
 
-// =========================
-// CHART
-// =========================
+
 const labels = data.map(d => d.date);
 const qty = data.map(d => Number(d.qty));
 
-// tambah prediksi
 labels.push("Prediksi");
 qty.push(null);
 
