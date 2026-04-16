@@ -68,8 +68,22 @@ const topProduct = Object.keys(produkCount).reduce((a,b)=>
 document.getElementById("top-product").innerText = topProduct;
 
 
-const labels = data.map(d => d.date);
-const qty = data.map(d => Number(d.qty));
+// GROUP PER BULAN
+const monthlyData = {};
+
+data.forEach(d => {
+    const bulan = new Date(d.date).toISOString().slice(0, 7);
+
+    if (!monthlyData[bulan]) {
+        monthlyData[bulan] = 0;
+    }
+
+    monthlyData[bulan] += Number(d.qty);
+});
+
+// urutkan bulan
+const labels = Object.keys(monthlyData).sort();
+const qty = labels.map(b => monthlyData[b]);
 
 labels.push("Prediksi");
 qty.push(null);
