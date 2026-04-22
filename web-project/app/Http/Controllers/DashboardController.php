@@ -30,7 +30,6 @@ class DashboardController extends Controller
             ->get();
 
         $lastData = $data->take(-6)->values();
-
         $prediksi = 0;
 
         if ($lastData->count() >= 6) {
@@ -57,6 +56,46 @@ class DashboardController extends Controller
             }
         }
 
-        return view('dashboard', compact('data', 'prediksi'));
+        $prediksiProduk = [];
+
+        $produkGroup = $data->groupBy('product');
+
+        foreach ($produkGroup as $namaProduk => $items) {
+
+            $lastItems = $items->take(-6)->values();
+
+            if ($lastItems->count() >= 6) {
+
+                $last = $lastItems->last();
+
+                $payload = [
+                    "t" => count($items),
+                    "month" => date('m', strtotime($last->date . "-01")),
+                    "year" => date('Y', strtotime($last->date . "-01")),
+
+                    "lag1" => $lastItems[5]->qty,
+                    "lag2" => $lastItems[4]->qty,
+                    "lag3" => $lastItems[3]->qty,
+                    "lag4" => $lastItems[2]->qty,
+                    "lag5" => $lastItems[1]->qty,
+                ];
+
+                try {
+                    $response = Http::post('http://127.0.0.1:5000/predict', $payload);
+
+                    $prediksiProduk[$namaProduk] =
+                        $response->json()['prediction'] ?? 0;
+
+                } catch (\Exception $e) {
+                    $prediksiProduk[$namaProduk] = 0;
+                }
+            }
+        }
+
+        return view('dashboard', [
+            'data' => $data,
+            'prediksi' => $prediksi,
+            'prediksiProduk' => $prediksiProduk
+        ]);
     }
 }

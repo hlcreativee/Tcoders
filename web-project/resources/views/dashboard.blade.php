@@ -37,79 +37,142 @@
     <canvas id="chart"></canvas>
 </div>
 
+<h3>Prediksi Penjualan per Produk (Bulan Depan)</h3>
+<canvas id="chart-produk"></canvas>
+
+<ul id="prediksi-produk"></ul>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
 <script>
+document.addEventListener("DOMContentLoaded", function() {
 
-const data = @json($data);
-const prediksi = {{ $prediksi }};
+    const data = @json($data);
+    const prediksi = {{ $prediksi }};
 
-let totalRevenue = 0;
-data.forEach(d => totalRevenue += Number(d.total));
+    const formatRupiah = val => "Rp " + Number(val).toLocaleString();
+    const formatNumber = val => Number(val).toLocaleString();
 
-document.getElementById("total-revenue").innerText =
-    "Rp " + totalRevenue.toLocaleString();
+    let totalRevenue = 0;
+    data.forEach(d => totalRevenue += Number(d.total));
 
+    document.getElementById("total-revenue").innerText = formatRupiah(totalRevenue);
+    document.getElementById("total-trx").innerText = data.length;
 
+    const produkCount = {};
+    data.forEach(d => {
+        produkCount[d.product] = (produkCount[d.product] || 0) + Number(d.qty);
+    });
 
-document.getElementById("total-trx").innerText = data.length;
+    const sortedProduk = Object.entries(produkCount)
+        .sort((a,b)=>b[1]-a[1]);
 
+    const topProduct = sortedProduk.length ? sortedProduk[0][0] : "-";
+    document.getElementById("top-product").innerText = topProduct;
 
-const produkCount = {};
+    const monthlyData = {};
 
-data.forEach(d => {
-    produkCount[d.product] = (produkCount[d.product] || 0) + Number(d.qty);
-});
+    data.forEach(d => {
+        const date = new Date(d.date + "-01");
+        const bulan = date.getFullYear() + '-' +
+            (date.getMonth()+1).toString().padStart(2,'0');
 
-const topProduct = Object.keys(produkCount).reduce((a,b)=>
-    produkCount[a] > produkCount[b] ? a : b
-);
+        monthlyData[bulan] = (monthlyData[bulan] || 0) + Number(d.qty);
+    });
 
-document.getElementById("top-product").innerText = topProduct;
+    const labels = Object.keys(monthlyData).sort();
+    const qty = labels.map(l => monthlyData[l]);
 
+    const lastDate = new Date(labels[labels.length - 1] + "-01");
+    lastDate.setMonth(lastDate.getMonth() + 1);
 
-// GROUP PER BULAN
-const monthlyData = {};
+    const nextMonth = lastDate.getFullYear() + '-' +
+        (lastDate.getMonth()+1).toString().padStart(2,'0');
 
-data.forEach(d => {
-    const bulan = new Date(d.date).toISOString().slice(0, 7);
+    labels.push(nextMonth);
+    qty.push(null);
 
-    if (!monthlyData[bulan]) {
-        monthlyData[bulan] = 0;
-    }
+    const prediksiPerProduk = {};
 
-    monthlyData[bulan] += Number(d.qty);
-});
+    sortedProduk.slice(0,5).forEach(([produk, total]) => {
+        const ratio = total / Object.values(produkCount).reduce((a,b)=>a+b,0);
+        prediksiPerProduk[produk] = Math.round(ratio * prediksi);
+    });
 
-// urutkan bulan
-const labels = Object.keys(monthlyData).sort();
-const qty = labels.map(b => monthlyData[b]);
+    const datasetsPrediksi = Object.keys(prediksiPerProduk).map((produk, i) => {
 
-labels.push("Prediksi");
-qty.push(null);
+        const warna = `hsl(${i*60}, 70%, 55%)`;
 
-const predLine = [...Array(qty.length - 1).fill(null), prediksi];
+        return {
+            type: 'bar',
+            label: produk,
+            data: [...Array(qty.length - 1).fill(null), prediksiPerProduk[produk]],
+            backgroundColor: warna
+        };
+    });
 
-new Chart(document.getElementById("chart"), {
-    data: {
-        labels: labels,
-        datasets: [
-            {
-                type: 'bar',
-                label: 'Aktual',
-                data: qty
+    new Chart(document.getElementById("chart"), {
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    type: 'bar',
+                    label: 'Aktual',
+                    data: qty,
+                    backgroundColor: '#4e73df'
+                },
+                ...datasetsPrediksi
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(ctx) {
+                            return ctx.dataset.label + ": " + formatNumber(ctx.raw);
+                        }
+                    }
+                }
             },
-            {
-                type: 'line',
-                label: 'Prediksi',
-                data: predLine,
-                borderDash: [5,5],
-                tension: 0.4
+            scales: {
+                y: {
+                    ticks: {
+                        callback: val => formatNumber(val)
+                    }
+                }
             }
-        ]
-    }
-});
+        }
+    });
 
+    new Chart(document.getElementById("chart-produk"), {
+        type: 'bar',
+        data: {
+            labels: Object.keys(prediksiPerProduk),
+            datasets: [{
+                label: 'Prediksi per Produk',
+                data: Object.values(prediksiPerProduk),
+                backgroundColor: '#1cc88a'
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: ctx => formatNumber(ctx.raw)
+                    }
+                }
+            }
+        }
+    });
+
+});
 </script>
 
 @endsection
