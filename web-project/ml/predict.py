@@ -19,39 +19,59 @@ fitur = data['fitur']
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        req = request.json
+        req = request.get_json(force=True)
+
+        if isinstance(req, dict):
+            req = [req]
 
         if not isinstance(req, list):
-            return jsonify({"error": "Input harus berupa array data"}), 400
+            return jsonify({"error": "Input harus berupa object atau array"}), 400
 
         df = pd.DataFrame(req)
 
+        if 'Description' not in df.columns:
+            df['Description'] = 'Unknown'
+
         missing_cols = [col for col in fitur if col not in df.columns]
         if missing_cols:
-            return jsonify({"error": f"Kolom kurang: {missing_cols}"}), 400
+            return jsonify({
+                "error": "Kolom kurang",
+                "missing": missing_cols,
+                "expected": fitur
+            }), 400
 
-        if 'Description' not in df.columns:
-            return jsonify({"error": "Kolom Description wajib ada"}), 400
+        for col in fitur:
+            df[col] = pd.to_numeric(df[col], errors='coerce')
 
-        desc = df['Description']
-
-        df_model = df[fitur]
-
-        preds = model.predict(df_model)
+        if df[fitur].isnull().any().any():
+            return jsonify({
+                "error": "Ada nilai null / tidak valid di fitur"
+            }), 400
+        
+        preds = model.predict(df[fitur])
 
         df_result = pd.DataFrame({
-            'Description': desc,
+            'Description': df['Description'],
             'prediction': preds
         })
 
-        hasil = df_result.groupby('Description')['prediction'].sum().to_dict()
+        hasil = (
+            df_result
+            .groupby('Description')['prediction']
+            .sum()
+            .sort_values(ascending=False)
+            .head(5)
+            .to_dict()
+        )
 
-        hasil = dict(sorted(hasil.items(), key=lambda x: x[1], reverse=True)[:5])
-
-        return jsonify(hasil)
+        return jsonify({
+            "prediction": hasil
+        })
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({
+            "error": str(e)
+        }), 500
 
 
 if __name__ == '__main__':

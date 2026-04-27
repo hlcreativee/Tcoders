@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Profil</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div id="sidebar-container"></div>
+
+<!-- MAIN -->
+<div class="main">
+
+    <div class="header">
+        <h2>Profil Pengguna</h2>
+        <button class="btn" onclick="openModal()">Edit Profil</button>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="profile-card">
+
+        <div>
+            <img id="profileImage" class="profile-img">
+            <br>
+            <input type="file" accept="image/*" onchange="uploadFoto()">
+        </div>
+
+        <div>
+            <h2 id="namaText">Daniel Oke</h2>
+            <p id="roleText">Admin Retail Pro</p>
+            <small id="statusText">Aktif sejak 2024</small>
+        </div>
+    </div>
+
+    <!-- INFO -->
+    <div class="grid">
+        <div class="card">
+            <h4>Email</h4>
+            <p id="emailText">daniel@email.com</p>
+        </div>
+
+        <div class="card">
+            <h4>No HP</h4>
+            <p id="hpText">08123456789</p>
+        </div>
+
+        <div class="card">
+            <h4>Alamat</h4>
+            <p id="alamatText">Sidoarjo, Indonesia</p>
+        </div>
+    </div>
+
+</div>
+
+<!-- MODAL tetap -->
+<div id="modalEdit" class="modal">
+    <div class="modal-content">
+        <h3>Edit Profil</h3>
+
+        <input type="text" id="namaInput" placeholder="Nama"><br><br>
+        <input type="text" id="roleInput" placeholder="Role"><br><br>
+        <input type="text" id="statusInput" placeholder="Status"><br><br>
+        <input type="text" id="emailInput" placeholder="Email"><br><br>
+        <input type="text" id="hpInput" placeholder="No HP"><br><br>
+        <input type="text" id="alamatInput" placeholder="Alamat"><br><br>
+
+        <button onclick="simpan()">Simpan</button>
+        <button onclick="closeModal()">Batal</button>
+    </div>
+</div>
+
+<script src="sidebar.js"></script>
+
+<!-- JS kamu tetap -->
+<script>
+// MODAL
+function openModal() {
+    modalEdit.style.display = "block";
+
+    namaInput.value = namaText.innerText;
+    roleInput.value = roleText.innerText;
+    statusInput.value = statusText.innerText;
+    emailInput.value = emailText.innerText;
+    hpInput.value = hpText.innerText;
+    alamatInput.value = alamatText.innerText;
+}
+
+function closeModal() {
+    modalEdit.style.display = "none";
+}
+
+// SIMPAN DATA
+function simpan() {
+    localStorage.setItem("nama", namaInput.value);
+    localStorage.setItem("role", roleInput.value);
+    localStorage.setItem("status", statusInput.value);
+    localStorage.setItem("email", emailInput.value);
+    localStorage.setItem("hp", hpInput.value);
+    localStorage.setItem("alamat", alamatInput.value);
+
+    loadData();
+    closeModal();
+}
+
+// LOAD DATA
+function loadData() {
+    if(localStorage.getItem("nama")) namaText.innerText = localStorage.getItem("nama");
+    if(localStorage.getItem("role")) roleText.innerText = localStorage.getItem("role");
+    if(localStorage.getItem("status")) statusText.innerText = localStorage.getItem("status");
+    if(localStorage.getItem("email")) emailText.innerText = localStorage.getItem("email");
+    if(localStorage.getItem("hp")) hpText.innerText = localStorage.getItem("hp");
+    if(localStorage.getItem("alamat")) alamatText.innerText = localStorage.getItem("alamat");
+}
+
+// UPLOAD FOTO
+function uploadFoto() {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        profileImage.src = e.target.result;
+        localStorage.setItem("foto", e.target.result);
+    };
+
+    if(file) reader.readAsDataURL(file);
+}
+
+// LOAD FOTO
+function loadFoto() {
+    const foto = localStorage.getItem("foto");
+    if(foto) profileImage.src = foto;
+}
+
+// LOAD SEMUA
+window.onload = function() {
+    loadData();
+    loadFoto();
+};
+</script>
+
+</body>
+</html>

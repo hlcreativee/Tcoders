@@ -29,7 +29,8 @@ class DashboardController extends Controller
             ->orderBy('date')
             ->get();
 
-        $lastData = $data->take(-6)->values();
+        $lastData = $data->slice(-6)->values();
+
         $prediksi = 0;
 
         if ($lastData->count() >= 6) {
@@ -46,11 +47,17 @@ class DashboardController extends Controller
                 "lag3" => $lastData[3]->qty,
                 "lag4" => $lastData[2]->qty,
                 "lag5" => $lastData[1]->qty,
+
+                "Description" => "Total"
             ];
 
             try {
                 $response = Http::post('http://127.0.0.1:5000/predict', $payload);
-                $prediksi = $response->json()['prediction'] ?? 0;
+
+                $dataPrediksi = $response->json()['prediction'] ?? [];
+
+                $prediksi = count($dataPrediksi) ? max($dataPrediksi) : 0;
+
             } catch (\Exception $e) {
                 $prediksi = 0;
             }
@@ -62,7 +69,7 @@ class DashboardController extends Controller
 
         foreach ($produkGroup as $namaProduk => $items) {
 
-            $lastItems = $items->take(-6)->values();
+            $lastItems = $items->slice(-6)->values();
 
             if ($lastItems->count() >= 6) {
 
@@ -78,13 +85,17 @@ class DashboardController extends Controller
                     "lag3" => $lastItems[3]->qty,
                     "lag4" => $lastItems[2]->qty,
                     "lag5" => $lastItems[1]->qty,
+
+                    "Description" => $namaProduk
                 ];
 
                 try {
                     $response = Http::post('http://127.0.0.1:5000/predict', $payload);
 
+                    $dataPrediksi = $response->json()['prediction'] ?? [];
+
                     $prediksiProduk[$namaProduk] =
-                        $response->json()['prediction'] ?? 0;
+                        count($dataPrediksi) ? max($dataPrediksi) : 0;
 
                 } catch (\Exception $e) {
                     $prediksiProduk[$namaProduk] = 0;

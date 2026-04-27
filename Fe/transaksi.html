@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Transaksi</title>
+
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div id="sidebar-container"></div>
+
+<!-- MAIN -->
+<div class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <div>
+            <h2>MANAJEMEN TRANSAKSI</h2>
+            <small>Daftar Transaksi Retail Pro</small>
+        </div>
+
+        <input placeholder="Cari transaksi, ID, pelanggan...">
+    </div>
+
+    <!-- FILTER -->
+    <div class="filters">
+        <input type="text" value="Jan 2026 - Dec 2026">
+        <select>
+            <option>Online/Offline</option>
+        </select>
+        <select>
+            <option>Kategori Produk</option>
+        </select>
+    </div>
+
+    <!-- TABEL DATA -->
+    <div class="table-box">
+        <h3>Data Transaksi</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tanggal</th>
+                    <th>Kategori</th>
+                    <th>Produk</th>
+                    <th>Unit</th>
+                    <th>Harga</th>
+                    <th>Total</th>
+                    <th>Region</th>
+                    <th>Pembayaran</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>20001</td>
+                    <td>2024-01-01</td>
+                    <td>Electronics</td>
+                    <td>iPhone 15 Pro</td>
+                    <td>5</td>
+                    <td>$1099.99</td>
+                    <td>$5499.95</td>
+                    <td>North America</td>
+                    <td>Credit Card</td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+
+    <!-- BUTTON -->
+    <button class="btn" onclick="toggleForm()">+ Buat Transaksi</button>
+
+    <!-- FORM INPUT -->
+    <div id="form-box" class="form-box hidden">
+        <h3>Tambah Transaksi</h3>
+
+        <input id="id" placeholder="ID Transaksi">
+        <input id="tanggal" type="date">
+
+        <select id="kategori">
+            <option>Electronics</option>
+        </select>
+
+        <input id="produk" placeholder="Nama Produk">
+        <input id="unit" type="number" placeholder="Jumlah Barang">
+        <input id="harga" type="number" placeholder="Harga per Unit">
+
+        <input id="total" type="number" placeholder="Total (auto/manual)">
+
+        <input id="region" placeholder="Region (Asia, EU, dll)">
+
+        <select id="pembayaran">
+            <option>Cash</option>
+            <option>Credit Card</option>
+            <option>Debit Card</option>
+            <option>E-Wallet</option>
+        </select>
+
+        <button class="btn" onclick="tambahData()">Simpan</button>
+    </div>
+
+    </div>
+
+<script src="sidebar.js"></script>
+<script>
+    function toggleForm() {
+    const form = document.getElementById("form-box");
+    form.classList.toggle("hidden");
+}
+
+// dummy data
+const data = [
+    {
+        id: "TRX001",
+        tanggal: "2026-01-25",
+        customer: "C001",
+        gender: "Male",
+        umur: 25,
+        kategori: "Electronics",
+        jumlah: 1,
+        harga: 2850000,
+        total: 2850000
+    }
+];
+
+const tbody = document.getElementById("table-body");
+
+data.forEach(d => {
+    tbody.innerHTML += `
+        <tr>
+            <td>${d.id}</td>
+            <td>${d.tanggal}</td>
+            <td>${d.customer}</td>
+            <td>${d.gender}</td>
+            <td>${d.umur}</td>
+            <td>${d.kategori}</td>
+            <td>${d.jumlah}</td>
+            <td>Rp ${d.harga.toLocaleString()}</td>
+            <td>Rp ${d.total.toLocaleString()}</td>
+        </tr>
+    `;
+});
+</script>
+
+</body>
+</html>

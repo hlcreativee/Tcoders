@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard Penjualan</title>
+
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div id="sidebar-container"></div>
+
+<!-- MAIN -->
+<div class="main">
+
+    <!-- HEADER -->
+    <div class="header">
+        <h2>Dashboard Penjualan</h2>
+        <input class="search-box" placeholder="Cari produk...">
+    </div>
+
+    <!-- CARDS -->
+    <div class="cards">
+
+        <div class="card">
+            <h4>Total Revenue</h4>
+            <h2 id="total-revenue">-</h2>
+        </div>
+
+        <div class="card">
+            <h4>Total Transaksi</h4>
+            <h2 id="total-trx">-</h2>
+        </div>
+
+        <div class="card">
+            <h4>Produk Terlaris</h4>
+            <h2 id="top-product">-</h2>
+        </div>
+
+        <div class="card">
+            <h4>Prediksi Berikutnya</h4>
+            <h2 id="prediksi">-</h2>
+        </div>
+
+    </div>
+
+    <!-- CHART UTAMA -->
+    <div class="chart-box">
+        <h3>Trend Penjualan & Prediksi</h3>
+        <canvas id="chart"></canvas>
+    </div>
+
+    <!-- CHART PRODUK -->
+    <div class="chart-box">
+        <h3>Perbandingan Penjualan per Produk</h3>
+        <canvas id="chartProduk"></canvas>
+    </div>
+
+</div>
+
+<script src="sidebar.js"></script>
+
+<script>
+
+// ================= DATASET =================
+const data = [
+    {date:"2024-01-01", product:"iPhone 15 Pro", qty:5, total:5499.95},
+    {date:"2024-01-02", product:"AirPods Max", qty:5, total:2745},
+    {date:"2024-01-03", product:"AirPods Pro", qty:2, total:499.98},
+    {date:"2024-01-04", product:"Apple Watch Series 8", qty:2, total:799.98},
+    {date:"2024-01-05", product:"Apple TV 4K", qty:3, total:537},
+    {date:"2024-01-06", product:"iPad Mini", qty:2, total:999.98},
+    {date:"2024-01-07", product:"iPad Air", qty:1, total:599.99},
+    {date:"2024-01-08", product:"MacBook Pro 14-inch", qty:3, total:5999.97},
+    {date:"2024-01-09", product:"AirPods 3rd Gen", qty:1, total:199.99},
+    {date:"2024-01-10", product:"Apple TV 4K", qty:4, total:716},
+    {date:"2024-01-11", product:"iPhone 14 Pro", qty:5, total:4999.95},
+    {date:"2024-01-12", product:"iPhone 13", qty:3, total:2399.97},
+    {date:"2024-01-13", product:"iPhone 14 Pro", qty:1, total:999.99},
+    {date:"2024-01-14", product:"iPad Pro 11-inch", qty:4, total:3199.96},
+    {date:"2024-01-15", product:"iPad Pro 11-inch", qty:2, total:1599.98},
+    {date:"2024-01-16", product:"AirPods Pro", qty:2, total:499.98},
+    {date:"2024-01-17", product:"AirPods Pro", qty:2, total:499.98},
+    {date:"2024-01-18", product:"iPhone 14 Pro", qty:2, total:1999.98},
+    {date:"2024-01-19", product:"iPhone 14 Pro", qty:3, total:2999.97},
+    {date:"2024-01-20", product:"iPhone 14 Pro", qty:3, total:2999.97},
+    {date:"2024-01-21", product:"Apple Watch SE", qty:4, total:1119.96},
+    {date:"2024-01-22", product:"MacBook Pro 14-inch", qty:3, total:5999.97}
+];
+
+// ================= TOTAL =================
+let totalRevenue = 0;
+data.forEach(d => totalRevenue += d.total);
+
+document.getElementById("total-revenue").innerText =
+    "Rp " + totalRevenue.toLocaleString();
+
+document.getElementById("total-trx").innerText = data.length;
+
+// ================= PRODUK TERLARIS =================
+const produkCount = {};
+
+data.forEach(d => {
+    produkCount[d.product] = (produkCount[d.product] || 0) + d.qty;
+});
+
+const topProduct = Object.keys(produkCount).reduce((a,b)=>
+    produkCount[a] > produkCount[b] ? a : b
+);
+
+document.getElementById("top-product").innerText = topProduct;
+
+// ================= CHART UTAMA =================
+const labels = data.map(d => d.date);
+const penjualan = data.map(d => d.total);
+
+// ================= PREDIKSI =================
+const n = penjualan.length;
+let sumX=0,sumY=0,sumXY=0,sumX2=0;
+
+for(let i=0;i<n;i++){
+    sumX+=i;
+    sumY+=penjualan[i];
+    sumXY+=i*penjualan[i];
+    sumX2+=i*i;
+}
+
+const a=(n*sumXY - sumX*sumY)/(n*sumX2 - sumX*sumX);
+const b=(sumY - a*sumX)/n;
+
+const prediksi = [];
+const predLabels = [];
+
+for(let i=0;i<3;i++){
+    const x = n + i;
+    const y = a*x + b;
+    prediksi.push(y);
+    predLabels.push("Pred-"+(i+1));
+}
+
+document.getElementById("prediksi").innerText =
+    "Rp " + Math.round(prediksi[0]).toLocaleString();
+
+// ================= CHART UTAMA =================
+new Chart(document.getElementById("chart"), {
+    data: {
+        labels: [...labels, ...predLabels],
+        datasets: [
+            {
+                type: 'bar',
+                label: 'Aktual',
+                data: [...penjualan, null,null,null],
+                backgroundColor: '#3b82f6'
+            },
+            {
+                type: 'line',
+                label: 'Prediksi',
+                data: [...Array(n).fill(null), ...prediksi],
+                borderColor: '#10b981',
+                borderDash: [5,5],
+                tension: 0.4
+            }
+        ]
+    }
+});
+
+// ================= CHART PRODUK =================
+const produkRevenue = {};
+
+data.forEach(d => {
+    if (!produkRevenue[d.product]) {
+        produkRevenue[d.product] = 0;
+    }
+    produkRevenue[d.product] += d.total;
+});
+
+const produkLabels = Object.keys(produkRevenue);
+const produkData = Object.values(produkRevenue);
+
+new Chart(document.getElementById("chartProduk"), {
+    type: 'bar',
+    data: {
+        labels: produkLabels,
+        datasets: [{
+            label: 'Revenue per Produk',
+            data: produkData,
+            backgroundColor: '#6366f1'
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: { beginAtZero: true }
+        }
+    }
+});
+
+</script>
+
+</body>
+</html>
