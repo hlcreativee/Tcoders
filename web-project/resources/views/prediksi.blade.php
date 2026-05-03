@@ -1,7 +1,6 @@
 @extends('layouts.app')
 
 @section('content')
-
 <div class="header">
     <h2>Analisis Prediksi Penjualan</h2>
 </div>

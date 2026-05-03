@@ -4,7 +4,7 @@
     <div class="menu">
         <a href="/dashboard" class="{{ request()->is('dashboard') ? 'active' : '' }}">Dashboard</a>
         <a href="/transaksi" class="{{ request()->is('transaksi') ? 'active' : '' }}">Transaksi</a>
-        <a href="/prediksi" class="{{ request()->is('prediksi') ? 'active' : '' }}">Prediksi</a>
+        <a href="/predictions" class="{{ request()->is('predictions') ? 'active' : '' }}">Prediksi</a>
     </div>
 
     <div class="profile">
