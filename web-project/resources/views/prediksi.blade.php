@@ -25,13 +25,11 @@
 <h3>Prediksi per Produk</h3>
 <canvas id="chart-produk" height="120"></canvas>
 
-<!-- ✅ WAJIB: CHART.JS -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
 
-    // ================= DATA DARI LARAVEL =================
     const data = @json($data ?? []);
     const prediksi = {{ $prediksi ?? 0 }};
     const prediksiProduk = @json($prediksiProduk ?? []);
@@ -45,7 +43,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
     const formatNumber = val => Number(val).toLocaleString();
 
-    // ================= AGREGASI BULANAN =================
     const monthlyData = {};
 
     data.forEach(d => {
@@ -55,7 +52,6 @@ document.addEventListener("DOMContentLoaded", function() {
     const labels = Object.keys(monthlyData).sort();
     const qty = labels.map(l => monthlyData[l]);
 
-    // ================= TAMBAH BULAN DEPAN =================
     const last = labels[labels.length - 1];
     if (!last) return;
 
@@ -68,7 +64,6 @@ document.addEventListener("DOMContentLoaded", function() {
     labels.push(nextMonth);
     qty.push(null);
 
-    // ================= HITUNG PROPORSI PRODUK =================
     const produkCount = {};
 
     data.forEach(d => {
@@ -81,7 +76,6 @@ document.addEventListener("DOMContentLoaded", function() {
         .sort((a,b)=>b[1]-a[1])
         .slice(0,5);
 
-    // ================= PREDIKSI PER ITEM =================
     const prediksiPerItem = {};
 
     topProduk.forEach(([produk, total]) => {
@@ -89,7 +83,6 @@ document.addEventListener("DOMContentLoaded", function() {
         prediksiPerItem[produk] = Math.round(ratio * prediksi);
     });
 
-    // ================= DATASET PRODUK =================
     const datasetProduk = Object.keys(prediksiPerItem).map((produk, i) => {
         return {
             type: 'bar',
@@ -99,7 +92,6 @@ document.addEventListener("DOMContentLoaded", function() {
         };
     });
 
-    // ================= CHART UTAMA =================
     new Chart(document.getElementById("chart"), {
         data: {
             labels: labels,
@@ -144,7 +136,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    // ================= CHART PRODUK =================
     const sorted = Object.entries(prediksiPerItem)
         .sort((a,b)=>b[1]-a[1]);
 

@@ -9,7 +9,6 @@ class PrediksiController extends Controller
 {
     public function index()
     {
-        // ================= AMBIL DATA =================
         $data = DB::table('transaksi')
             ->selectRaw("
                 date,
@@ -30,7 +29,6 @@ class PrediksiController extends Controller
             ->orderBy('date')
             ->get();
 
-        // ================= PREDIKSI TOTAL =================
         $lastData = $data->slice(-6)->values();
         $prediksi = 0;
 
@@ -60,7 +58,6 @@ class PrediksiController extends Controller
             }
         }
 
-        // ================= PREDIKSI PER PRODUK =================
         $prediksiProduk = [];
         $produkGroup = $data->groupBy('product');
 
@@ -68,7 +65,6 @@ class PrediksiController extends Controller
 
             $lastItems = $items->slice(-6)->values();
 
-            // ✅ Kalau cukup data → pakai AI
             if ($lastItems->count() >= 6) {
 
                 $last = $lastItems->last();
@@ -98,22 +94,16 @@ class PrediksiController extends Controller
                 }
 
             } else {
-                // 🔥 FALLBACK kalau data kurang → pakai total asli
                 $prediksiProduk[$namaProduk] = $items->sum('qty');
             }
         }
-
-        // ================= SORT =================
         arsort($prediksiProduk);
 
-        // ================= TOP PRODUCT =================
         if (empty($prediksiProduk)) {
             $topProduct = 'Tidak ada';
         } else {
             $topProduct = array_key_first($prediksiProduk);
         }
-
-        // ================= RETURN =================
         return view('prediksi', [
             'data' => $data,
             'prediksi' => $prediksi,
